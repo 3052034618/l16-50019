@@ -4,13 +4,14 @@ const bcrypt = require("bcryptjs");
 const config = require("../config");
 const { RefreshToken } = require("../models");
 
-function generateAccessToken(user) {
+function generateAccessToken(user, extra = {}) {
   return jwt.sign(
     {
       sub: user.id,
       email: user.email,
       phone: user.phone,
       nickname: user.nickname,
+      ...extra,
     },
     config.jwt.secret,
     { expiresIn: config.jwt.accessTokenExpiry }

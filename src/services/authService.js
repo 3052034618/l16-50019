@@ -39,7 +39,7 @@ async function oauthLoginOrRegister(providerName, code, codeVerifier, redirectUr
       return {
         status: "registration_incomplete",
         userId: user.id,
-        tempToken: generateAccessToken({ ...user, purpose: "complete_registration" }),
+        tempToken: generateAccessToken(user, { purpose: "complete_registration" }),
       };
     }
 
@@ -75,7 +75,7 @@ async function oauthLoginOrRegister(providerName, code, codeVerifier, redirectUr
         return {
           status: "registration_incomplete",
           userId: existingUser.id,
-          tempToken: generateAccessToken({ ...existingUser, purpose: "complete_registration" }),
+          tempToken: generateAccessToken(existingUser, { purpose: "complete_registration" }),
         };
       }
 
@@ -115,7 +115,7 @@ async function oauthLoginOrRegister(providerName, code, codeVerifier, redirectUr
     return {
       status: "registration_incomplete",
       userId: newUser.id,
-      tempToken: generateAccessToken({ ...newUser, purpose: "complete_registration" }),
+      tempToken: generateAccessToken(newUser, { purpose: "complete_registration" }),
     };
   }
 
