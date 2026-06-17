@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { refreshAccessToken, tryRefreshOAuthToken, handleOAuthTokenRefreshFailure } = require("../services/authService");
 const { OAuthAccount } = require("../models");
+const { authMiddleware } = require("../middleware/auth");
 
 router.post("/refresh", async (req, res) => {
   try {
@@ -23,14 +24,16 @@ router.post("/refresh", async (req, res) => {
   }
 });
 
-router.post("/oauth/refresh", async (req, res) => {
+router.post("/oauth/refresh", authMiddleware, async (req, res) => {
   try {
-    const { userId, provider } = req.body;
-    if (!userId || !provider) {
-      return res.status(400).json({ error: "userId and provider are required" });
+    const { provider } = req.body;
+    const currentUserId = req.user.sub;
+
+    if (!provider) {
+      return res.status(400).json({ error: "provider is required" });
     }
 
-    const oauthAccounts = await OAuthAccount.findOAuthByUserId(userId);
+    const oauthAccounts = await OAuthAccount.findOAuthByUserId(currentUserId);
     const oauthAccount = oauthAccounts.find((a) => a.provider === provider);
 
     if (!oauthAccount) {
@@ -45,13 +48,12 @@ router.post("/oauth/refresh", async (req, res) => {
         message: "OAuth token refreshed successfully",
       });
     } else {
-      const degradation = await handleOAuthTokenRefreshFailure(userId, provider);
+      await handleOAuthTokenRefreshFailure(currentUserId, provider);
 
       res.json({
         success: false,
         degraded: true,
-        message: "OAuth token refresh failed, degraded to password login",
-        tempPassword: degradation.tempPassword || undefined,
+        message: "OAuth token refresh failed, please use password login or re-authorize",
       });
     }
   } catch (error) {

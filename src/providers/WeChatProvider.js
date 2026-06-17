@@ -13,6 +13,8 @@ class WeChatProvider extends BaseProvider {
       response_type: "code",
       scope: this.config.scope,
       state,
+      code_challenge: codeChallenge,
+      code_challenge_method: codeChallengeMethod,
     });
     return `${this.config.authorizeUrl}?${params.toString()}#wechat_redirect`;
   }
@@ -24,6 +26,7 @@ class WeChatProvider extends BaseProvider {
         secret: this.config.clientSecret,
         code,
         grant_type: "authorization_code",
+        code_verifier: codeVerifier,
       },
     });
 

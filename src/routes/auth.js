@@ -120,7 +120,18 @@ router.post("/:provider/bind", authMiddleware, async (req, res) => {
 
     const result = await bindOAuthAccount(userId, providerName, code, pkceData.codeVerifier, pkceData.redirectUri);
 
-    res.json({ status: result.status });
+    const response = { status: result.status };
+    if (result.status === "merged") {
+      response.accessToken = result.accessToken;
+      response.refreshToken = result.refreshToken;
+      response.targetUser = {
+        id: result.targetUser.id,
+        email: result.targetUser.email,
+        phone: result.targetUser.phone,
+        nickname: result.targetUser.nickname,
+      };
+    }
+    res.json(response);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

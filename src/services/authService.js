@@ -95,7 +95,7 @@ async function oauthLoginOrRegister(providerName, code, codeVerifier, redirectUr
     email: userInfo.email || null,
     nickname: userInfo.nickname || userInfo.name,
     avatar: userInfo.avatar,
-    registrationComplete: !!(userInfo.email),
+    registrationComplete: false,
   });
 
   await OAuthAccount.createOAuth({
@@ -252,9 +252,14 @@ async function bindOAuthAccount(userId, providerName, code, codeVerifier, redire
 
       await User.deleteUser(userId);
 
+      const accessToken = generateAccessToken(existingUser);
+      const refreshToken = await generateRefreshTokenRecord(existingUser.id);
+
       return {
         status: "merged",
         targetUser: existingUser,
+        accessToken,
+        refreshToken,
       };
     }
   }
